@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Priyamvadhaa Hoskere — Computer Science and Engineering undergraduate exploring computational genomics, bioinformatics and machine learning.">
+  <meta name="theme-color" content="#0d1b3a">
+  <title>Priyamvadhaa Hoskere | CS & Computational Genomics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <a class="brand" href="#home">Priyamvadhaa Hoskere</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
+      <div class="nav-links" id="navLinks">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#research">Research</a>
+        <a href="#contact" class="nav-cta">Get in touch</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" id="home">
+      <p class="hero-role"><span class="status-dot"></span>Computer Science &amp; Engineering undergraduate, Bengaluru</p>
+      <h1>Priyamvadhaa<br>Hoskere</h1>
+      <p class="hero-lead">I use code and machine learning to ask questions about biology, with a focus on genomic data and hereditary disease.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#projects">See my projects</a>
+        <a class="button button-ghost" href="{{ url_for('static', filename='files/resume.pdf') }}" target="_blank" rel="noopener">View résumé</a>
+      </div>
+      <figure class="trace" aria-label="A DNA sequencing trace generated from the letters of my name">
+        <div class="trace-canvas" id="trace"></div>
+        <figcaption>My name, read as a DNA sequence. Each letter maps to one base: A, C, G or T.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section wrap about" id="about">
+      <h2>Curiosity, translated into computation.</h2>
+      <div class="about-body">
+        <p class="lede">I'm a Computer Science and Engineering undergraduate at Gopalan College of Engineering and Management, building a foundation across programming, machine learning, backend systems and scientific computing.</p>
+        <p>My long-term interest lies in computational biology, particularly genomic data analysis and the use of computational methods to study hereditary diseases. I enjoy taking ownership of technical implementation and turning an idea into a working prototype.</p>
+        <dl class="facts">
+          <div><dt>CGPA</dt><dd>9.2</dd></div>
+          <div><dt>B.E. CSE</dt><dd>2025–29</dd></div>
+          <div><dt>CSE cohort</dt><dd>Top 10</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section projects" id="projects">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Selected projects</h2>
+          <p>Work across computational biology, applied AI and scientific software.</p>
+        </div>
+
+        <article class="project project-featured">
+          <div class="project-main">
+            <div class="project-meta"><span class="pill pill-live">Ongoing</span><span>Independent technical development</span></div>
+            <h3>PRISM</h3>
+            <p class="project-sub">AI-based genomic risk predictor</p>
+            <p>A computational project exploring hereditary disease risk prediction, with a current focus on Parkinson's disease. I lead the programming and technical implementation, while collaborators support dataset discovery and documentation.</p>
+            <ul class="tags"><li>Python</li><li>Machine learning</li><li>Genomic data</li></ul>
+            <a class="project-link" href="https://github.com/Priya1706/GenePredictionModel" target="_blank" rel="noopener">View on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="project-visual" aria-hidden="true"><div class="strand" id="strand"></div></div>
+        </article>
+
+        <article class="project">
+          <div class="project-meta"><span class="pill">Hackathon</span><span>AI, computer vision</span></div>
+          <div class="project-body">
+            <h3>RootCause</h3>
+            <p class="project-sub">Crop disease detection</p>
+            <p>Contributed backend components for a rice and wheat crop disease detection application. Worked with TensorFlow and MobileNetV2 image-classification workflows using pretrained ImageNet weights.</p>
+            <ul class="tags"><li>Flask / APIs</li><li>TensorFlow</li><li>MobileNetV2</li></ul>
+          </div>
+        </article>
+
+        <article class="project">
+          <div class="project-meta"><span class="pill">Concept</span><span>Wearable, speech AI</span></div>
+          <div class="project-body">
+            <h3>EduNote AI</h3>
+            <p class="project-sub">Wearable lecture documentation</p>
+            <p>Designed a wearable lecture-capture and automated note-generation concept using Whisper transcription and local language-model summarization. Explored ESP32-based hardware integration and backend processing.</p>
+            <ul class="tags"><li>Whisper</li><li>Ollama</li><li>ESP32</li></ul>
+          </div>
+        </article>
+
+        <article class="project">
+          <div class="project-meta"><span class="pill">Built</span><span>Scientific computing</span></div>
+          <div class="project-body">
+            <h3>Numerical Methods Visualizer</h3>
+            <p>A Python-based project built to visualize numerical methods and mathematical procedures, making computational concepts easier to explore.</p>
+            <ul class="tags"><li>Python</li><li>NumPy</li><li>Matplotlib</li></ul>
+            <a class="project-link" href="https://github.com/Priya1706/Numerical-method-vizualizer" target="_blank" rel="noopener">View on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section wrap skills" id="skills">
+      <h2>Skills and tools</h2>
+      <dl class="skill-list">
+        <div><dt>Programming</dt><dd>Python, Java, C</dd></div>
+        <div><dt>Machine learning and AI</dt><dd>TensorFlow, MobileNetV2, Whisper, Ollama</dd></div>
+        <div><dt>Scientific computing</dt><dd>NumPy, Matplotlib</dd></div>
+        <div><dt>Backend</dt><dd>Flask, FastAPI, REST APIs</dd></div>
+        <div><dt>Developer tools</dt><dd>Git, GitHub, VS Code, Jupyter Notebook</dd></div>
+        <div><dt>Currently exploring</dt><dd>Bioinformatics, genomic data analysis</dd></div>
+      </dl>
+    </section>
+
+    <section class="research" id="research">
+      <div class="wrap research-inner">
+        <h2>Questions worth computing for.</h2>
+        <div>
+          <p>I'm especially interested in how computational approaches can help us understand complex biological systems and disease-associated patterns.</p>
+          <ul class="chips">
+            <li>Computational genomics</li><li>Bioinformatics</li><li>Genomic data analysis</li><li>Machine learning for biology</li><li>AI in healthcare</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap beyond">
+      <h2>Beyond the code</h2>
+      <div class="beyond-grid">
+        <div class="beyond-item">
+          <h3>Leadership</h3>
+          <p><strong>Vice President, TechEon Technical Club</strong></p>
+          <p>I help coordinate hands-on technical learning events and collaborative programming activities, creating spaces where people experiment, build and learn by doing.</p>
+        </div>
+        <div class="beyond-item">
+          <h3>Achievements</h3>
+          <ul>
+            <li>Ranked among the top 10 students in the CSE cohort.</li>
+            <li>NPTEL Elite certificate in Data Structures and Algorithms, 63/100.</li>
+          </ul>
+        </div>
+        <div class="beyond-item">
+          <h3>Certifications</h3>
+          <ul>
+            <li>Prompt Engineering Specialization, Vanderbilt University (Coursera)</li>
+            <li>Programming in C and Programming for Everybody, University of Michigan</li>
+            <li>Introduction to AI, Google</li>
+            <li>Google AI Essentials, Coursera</li>
+            <li>Data Structures &amp; Algorithms, IIT Kanpur, NPTEL (Elite)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="wrap">
+        <h2>Have an idea or a research question?</h2>
+        <p>I'm always glad to connect with people working across computer science, biology and technology.</p>
+        <a class="contact-mail" href="mailto:17hgp06priya@gmail.com">17hgp06priya@gmail.com</a>
+        <div class="contact-links">
+          <span>Bengaluru, Karnataka, India</span>
+          <a href="https://github.com/Priya1706" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://linkedin.com/in/priyamvadhaa-undefined-0482543b6" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap"><span>© <span id="year"></span> Priyamvadhaa Hoskere</span><a href="#home">Back to top</a></footer>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
