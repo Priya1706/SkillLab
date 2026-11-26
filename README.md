@@ -1,296 +1,159 @@
-# SentinelAI 
-### AI-Driven Anomaly Detection & Predictive Screening System
+# SkillLab
 
-**Problem Statement ID:** 26170  
-**Organization:** Indian Space Research Organisation (ISRO)  
-**Theme:** Smart Automation  
-**Category:** Software
+A collection of projects, practical implementations, and learning experiments developed as part of my technical skill training and independent development journey.
 
----
+This repository brings together applications built using Python, machine learning, web development, and AI integration.
 
-##  Overview
+## Projects
 
-SentinelAI is a machine learning-based component reliability screening system designed to detect latent defects and predict electrical parameter drift in electronic components undergoing Burn-In testing.
+### 1. SentinelAI – AI-Driven Anomaly Detection
 
-Traditional quality screening methods rely on fixed parametric thresholds, which can overlook components that technically pass initial specifications but exhibit abnormal behaviour over time.
+An intelligent screening system designed to detect anomalous electronic components and predict performance drift during burn-in testing.
 
-SentinelAI addresses this challenge through two integrated machine learning modules:
+**Key Features**
+- Dynamic anomaly detection using Isolation Forest.
+- Time-series drift prediction using Random Forest Regression.
+- Component-level risk classification.
+- Explainable AI for inspection insights.
+- Interactive Flask dashboard.
+- CSV data upload and PDF report generation.
 
-- **Dynamic Anomaly Detection:** Identifies abnormal component behaviour by comparing electrical measurements across a batch.
-- **Time-Series Drift Prediction:** Forecasts future electrical parameters to identify components at risk of degradation.
+**Technologies:** Python, Flask, Scikit-learn, Pandas, NumPy, Plotly.
 
-The platform also provides explainable predictions and an interactive dashboard to support quality assurance decisions.
+**Location:** `SentinelAI/`
 
-##  Objectives
+### 2. Personal AI Chatbot
 
-- Detect anomalous electronic components that pass conventional static limits.
-- Identify subtle deviations in electrical parameters.
-- Predict future component behaviour using early-stage measurements.
-- Calculate component drift rates and compare them against configurable safety thresholds.
-- Provide interpretable model predictions for quality inspection.
-- Enable batch-level component screening and automated reporting.
+A web-based conversational chatbot built using Streamlit and the OpenRouter API.
 
-##  Key Features
+**Key Features**
+- Interactive chat interface.
+- Configurable AI model selection.
+- Custom system prompts.
+- Adjustable temperature and token limits.
+- Conversation management.
 
-### 1. Dynamic Anomaly Detection
+**Technologies:** Python, Streamlit, OpenAI Python SDK, OpenRouter API.
 
-Uses the Isolation Forest algorithm to identify unusual component behaviour.
+**Location:** `chatbot/`
 
-Analyses parameters such as:
-- Standby current (Iddq)
-- Leakage current
-- Propagation delay
-- Temperature
-- Early-stage electrical measurements
-
-Components are classified into three categories:
-
-| Classification | Description |
-|---|---|
-| NORMAL | Expected electrical behaviour |
-| WARNING | Potential abnormality requiring attention |
-| ANOMALOUS | Significant deviation from expected behaviour |
-
-### 2. Time-Series Drift Prediction
-
-Uses a Random Forest Regression model to predict the electrical parameter value at 168 hours.
-
-**Input parameters:**
-- Value_0h
-- Value_24h
-
-**Prediction:**
-- Value_168h
-
-The system calculates predicted drift and drift rate, then compares the result against a configurable safety slope to identify potentially unreliable components.
-
-### 3. Explainable AI
-
-Provides interpretable explanations for flagged components, including:
-
-- Parameters contributing to anomaly detection.
-- Deviations from batch-level behaviour.
-- Predicted electrical drift.
-- Safety threshold comparisons.
-- Component risk classification.
-
-### 4. Interactive Dashboard
-
-The web application provides:
-
-- Component screening overview.
-- Batch-level analytics.
-- Interactive data visualizations.
-- Component-level analysis.
-- Searchable and filterable component records.
-- CSV dataset upload.
-- CSV and PDF report exports.
-- Screening history and database storage.
-
-##  Machine Learning Approach
-
-| Module | Algorithm | Purpose |
-|---|---|---|
-| Anomaly Detection | Isolation Forest | Detect abnormal components |
-| Drift Prediction | Random Forest Regressor | Forecast Value_168h |
-| Preprocessing | RobustScaler | Scale electrical measurements |
-| Explainability | Feature attribution and statistical analysis | Explain model decisions |
-
-### Model Evaluation
-
-The drift prediction model is evaluated using:
-
-- Mean Absolute Error (MAE)
-- Root Mean Squared Error (RMSE)
-- R² Score
-
-The anomaly detection module prioritizes identifying defective components while minimizing false negatives.
-
-##  System Architecture
-
-```text
-       Component Dataset
-               |
-               v
-      Data Preprocessing
-               |
-        +------+------+
-        |             |
-        v             v
-   Anomaly        Drift
-   Detection     Prediction
-        |             |
-        v             v
-   Risk Score    Future Value
-        |             |
-        +------+------+
-               |
-               v
-        Explainable AI
-               |
-               v
-      Quality Dashboard
-               |
-        +------+------+
-        |             |
-        v             v
-    Analytics      Reports
-                  CSV / PDF
-```
-
-##  Technology Stack
-
-| Category | Technologies |
-|---|---|
-| Programming Language | Python |
-| Backend | Flask |
-| Frontend | HTML, CSS, JavaScript |
-| Machine Learning | Scikit-learn, XGBoost (where available) |
-| Data Processing | Pandas, NumPy |
-| Visualization | Plotly.js |
-| Database | SQLite |
-| Model Persistence | Joblib |
-| PDF Generation | FPDF2 |
-
-##  Project Structure
-
-```text
-SentinelAI/
-│
-├── app.py
-├── requirements.txt
-├── README.md
-├── database.db
-│
-├── models/
-│   ├── anomaly_model.py
-│   ├── drift_model.py
-│   ├── model_training.py
-│   └── saved/
-│
-├── data/
-│   ├── generate_dataset.py
-│   └── sample_components.csv
-│
-├── utils/
-│   ├── preprocessing.py
-│   ├── prediction.py
-│   └── explanation.py
-│
-├── templates/
-│   ├── base.html
-│   ├── index.html
-│   ├── dashboard.html
-│   ├── components.html
-│   ├── analysis.html
-│   └── reports.html
-│
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── script.js
-│
-└── uploads/
-```
-
-##  Installation & Setup
-
-### Prerequisites
-
-- Python 3.11 or later
-- Git
-- Web browser
-
-### 1. Clone the repository
+**Run locally:**
 
 ```bash
-git clone https://github.com/Priya1706/SkillLab.git
+pip install -r chatbot/requirements.txt
+streamlit run chatbot/app.py
 ```
 
-### 2. Navigate to the project directory
+Configure the OpenRouter API key using Streamlit secrets before running the application.
+
+### 3. Personal Portfolio Website
+
+A personal portfolio website developed using Python and Flask to showcase projects, technical skills, and academic work.
+
+**Technologies:** Python, Flask, HTML, CSS, JavaScript.
+
+**Location:** `priyamvadhaa_portfolio/`
+
+**Run locally:**
 
 ```bash
-cd SkillLab/SentinelAI
-```
-
-### 3. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-### 4. Activate the environment
-
-**Windows PowerShell:**
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-### 5. Install dependencies
-
-```bash
+cd priyamvadhaa_portfolio
 pip install -r requirements.txt
-```
-
-### 6. Run the application
-
-```bash
 python app.py
 ```
 
-### 7. Open in your browser
-
-```text
-http://127.0.0.1:5000
-```
-
-##  Dataset
-
-The project includes a synthetic Burn-In testing dataset containing 1,200 component records distributed across 12 batches.
-
-It represents different component behaviour patterns:
-
-- Normal components.
-- High leakage components.
-- Gradual drift components.
-- Latent defect components.
-- Sudden electrical shifts.
-
-Measurements are represented at 0h, 24h, 96h and 168h.
-
-The application also supports uploading compatible CSV datasets for component screening.
-
-**Note:** The included dataset is synthetically generated for demonstration and model development. It is not actual ISRO test data or proprietary aerospace component data.
-
-##  Evaluation & Validation
-
-The implemented drift prediction model was evaluated using a batch-grouped train/test split.
-
-| Metric | Observed Result |
-|---|---:|
-| MAE | 0.3349 |
-| RMSE | 0.5642 |
-| R² Score | 0.9791 |
-
-These results are from the synthetic demonstration dataset and should not be interpreted as validated performance on real-world aerospace components.
-
-##  Future Scope
-
-- Integration with real Burn-In testing equipment.
-- Support for additional electrical parameters.
-- Advanced time-series forecasting models.
-- Improved explainability using SHAP.
-- Real-time component monitoring.
-- Integration with industrial quality management systems.
-
-##  Developer
-
-**Priyamvadhaa Hoskere**
-
-GitHub: [@Priya1706](https://github.com/Priya1706)
+Open `http://127.0.0.1:5000` in your browser.
 
 ---
 
-*SentinelAI – Making component reliability screening smarter through machine learning.*
+## Learning and Training
+
+### Skilium Certificate
+
+Certificate obtained through skill training.
+
+**File:** `certificate/Skilium-Certificate.pdf`
+
+### Python Practice Notebook
+
+A Jupyter Notebook containing Python learning exercises and practical implementations.
+
+**File:** `notebook/skilllab.ipynb`
+
+---
+
+## Technologies and Tools
+
+| Category | Technologies |
+|---|---|
+| Programming Languages | Python |
+| Web Development | Flask, Streamlit, HTML, CSS, JavaScript |
+| Machine Learning | Scikit-learn, Random Forest, Isolation Forest |
+| Data Processing | Pandas, NumPy |
+| AI Integration | OpenRouter API, OpenAI Python SDK |
+| Visualization | Plotly |
+| Development Tools | VS Code, Jupyter Notebook, Git, GitHub |
+
+## Repository Structure
+
+```text
+SkillLab/
+│
+├── SentinelAI/
+│   ├── data/
+│   ├── models/
+│   ├── static/
+│   ├── templates/
+│   ├── utils/
+│   ├── app.py
+│   ├── README.md
+│   └── requirements.txt
+│
+├── chatbot/
+│   ├── app.py
+│   └── requirements.txt
+│
+├── priyamvadhaa_portfolio/
+│   ├── static/
+│   ├── templates/
+│   ├── app.py
+│   ├── Procfile
+│   ├── README.md
+│   └── requirements.txt
+│
+├── certificate/
+│   └── Skilium-Certificate.pdf
+│
+├── notebook/
+│   └── skilllab.ipynb
+│
+├── .gitignore
+└── README.md
+```
+
+## Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Priya1706/SkillLab.git
+cd SkillLab
+```
+
+Each project has its own dependencies and setup instructions. Refer to the respective project folders for details.
+
+## Security
+
+- API keys and credentials are stored locally using environment variables or Streamlit secrets.
+- Secret configuration files are excluded through `.gitignore`.
+- Never commit API keys, passwords, or other sensitive credentials.
+
+## Author
+
+**Priyamvadhaa Hoskere**
+
+- GitHub: [Priya1706](https://github.com/Priya1706)
+
+---
+
+This repository is continuously updated as new projects and learning experiences are added.
