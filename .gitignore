@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.streamlit/secrets.toml
+
+# Local databases
+
+
+# Temporary files
+*.log
+.DS_Store
+
+# Uploaded files
+SentinelAI/uploads/*
