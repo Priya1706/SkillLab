@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}QA Dashboard – SentinelAI{% endblock %}
+{% block page_title %}Quality Control Analytics Dashboard{% endblock %}
+{% block page_subtitle %}Real-time overview of dynamic anomalies, parametric drift predictions, and batch risk{% endblock %}
+
+{% block content %}
+<!-- Overview KPI Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card kpi-navy">
+      <div class="kpi-label">Total Tested</div>
+      <div class="kpi-value mono">{{ latest_run.total_components }}</div>
+      <div class="kpi-sub">Run #{{ latest_run.id }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card kpi-emerald">
+      <div class="kpi-label">Normal</div>
+      <div class="kpi-value mono text-success">{{ latest_run.normal_count }}</div>
+      <div class="kpi-sub">{{ "%.1f"|format(latest_run.normal_count / latest_run.total_components * 100) }}% of batch</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card kpi-amber">
+      <div class="kpi-label">Warning</div>
+      <div class="kpi-value mono text-warning">{{ latest_run.warning_count }}</div>
+      <div class="kpi-sub">Borderline monitor</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Anomalous</div>
+      <div class="kpi-value mono text-danger">{{ latest_run.anomalous_count }}</div>
+      <div class="kpi-sub">Isolation Forest flags</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">High-Risk Triage</div>
+      <div class="kpi-value mono text-danger">{{ latest_run.high_risk_count }}</div>
+      <div class="kpi-sub">Anomaly + Drift combined</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="kpi-card">
+      <div class="kpi-label">Latent Caught</div>
+      <div class="kpi-value mono text-primary">{{ latest_run.latent_caught_count }}</div>
+      <div class="kpi-sub">Passed static limits</div>
+    </div>
+  </div>
+</div>
+
+<!-- Model Performance & Threshold Bar -->
+<div class="card-panel mb-4">
+  <div class="card-panel-body py-3">
+    <div class="row align-items-center g-3">
+      <div class="col-lg-7">
+        <div class="d-flex flex-wrap align-items-center gap-4">
+          <div>
+            <div class="text-muted small fw-semibold text-uppercase">Module B Drift Model (Random Forest)</div>
+            <div class="small text-muted">Split: <span class="mono">{{ latest_run.split_strategy or "80/20" }}</span></div>
+          </div>
+          <div>
+            <div class="text-muted small">MAE</div>
+            <div class="fw-bold mono fs-5">{{ "%.4f"|format(latest_run.drift_mae) if latest_run.drift_mae is not none else "N/A" }}</div>
+          </div>
+          <div>
+            <div class="text-muted small">RMSE</div>
+            <div class="fw-bold mono fs-5">{{ "%.4f"|format(latest_run.drift_rmse) if latest_run.drift_rmse is not none else "N/A" }}</div>
+          </div>
+          <div>
+            <div class="text-muted small">R² Score</div>
+            <div class="fw-bold mono fs-5 text-primary">{{ "%.4f"|format(latest_run.drift_r2) if latest_run.drift_r2 is not none else "N/A" }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <form action="{{ url_for('run_analysis') }}" method="POST" class="d-flex align-items-end justify-content-lg-end gap-2 flex-wrap">
+          <input type="hidden" name="next" value="{{ url_for('dashboard') }}" />
+          <div>
+            <label class="form-label small text-muted mb-1">Safety Slope (units/hr)</label>
+            <input type="number" step="0.001" min="0.001" max="1.0" name="safety_slope" value="{{ safety_slope }}" class="form-control form-control-sm mono" style="width: 115px;" />
+          </div>
+          <div>
+            <label class="form-label small text-muted mb-1">Contamination</label>
+            <input type="number" step="0.01" min="0.02" max="0.40" name="contamination" value="{{ contamination }}" class="form-control form-control-sm mono" style="width: 95px;" />
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i>Apply &amp; Re-Run
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 1 Visualizations -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-5">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Component Anomaly Distribution</h2>
+        <span class="badge text-bg-light border">Module A</span>
+      </div>
+      <div class="card-panel-body">
+        <div id="chartAnomalyDist" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Leakage Current Distribution by Risk Status</h2>
+        <span class="badge text-bg-light border">Static Limit: 250 nA</span>
+      </div>
+      <div class="card-panel-body">
+        <div id="chartLeakageDist" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 2 Visualizations -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Component Burn-In Drift Trends (0h → 168h)</h2>
+        <span class="badge text-bg-light border">Time-Series</span>
+      </div>
+      <div class="card-panel-body">
+        <div id="chartDriftTrends" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Actual vs Predicted Value_168h</h2>
+        <span class="badge text-bg-light border">Module B</span>
+      </div>
+      <div class="card-panel-body">
+        <div id="chartActualVsPred" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 3 Batch Risk + Latent Defect Spotlight -->
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Risk Distribution Across Batches</h2>
+        <a href="{{ url_for('reports') }}" class="btn btn-sm btn-outline-primary">Batch Reports</a>
+      </div>
+      <div class="card-panel-body">
+        <div id="chartBatchRisk" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Latent Defect Spotlight</h2>
+        <span class="status-pill pill-blue">Static PASS → Flagged</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-industrial mb-0">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Batch</th>
+              <th>Score</th>
+              <th>Pred 168h</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in latent_samples %}
+            <tr>
+              <td class="mono fw-semibold">{{ item.component_id }}</td>
+              <td class="mono">{{ item.batch_id }}</td>
+              <td class="mono text-danger fw-bold">{{ "%.1f"|format(item.anomaly_score) }}</td>
+              <td class="mono">{{ "%.2f"|format(item.predicted_value_168h) }}</td>
+              <td>
+                <a href="{{ url_for('analysis', component_id=item.component_id) }}" class="btn btn-sm btn-outline-primary">Inspect</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">No latent defects flagged in this run.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{
+  "anomaly_summary": {
+    "n_samples": 1200.0,
+    "contamination": 0.14,
+    "anomalous_rate": 0.14,
+    "warning_rate": 0.10333333333333333,
+    "normal_rate": 0.7566666666666667,
+    "mean_decision_normal": 0.11904442935124251,
+    "mean_decision_anomalous": -0.04893406752173926
+  },
+  "drift_metrics": {
+    "mae": 0.3349,
+    "rmse": 0.5642,
+    "r2": 0.9791,
+    "train_samples": 900,
+    "test_samples": 300,
+    "split_strategy": "batch-grouped (80/20)"
+  },
+  "drift_feature_importances": {
+    "Value_0h": 0.43,
+    "Value_24h": 14.88,
+    "Early_Delta_24h": 43.07,
+    "Early_Slope_24h": 41.63
+  }
+}

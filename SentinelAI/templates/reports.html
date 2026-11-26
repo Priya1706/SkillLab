@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Batch Reports &amp; Exports – SentinelAI{% endblock %}
+{% block page_title %}Batch Analysis &amp; Quality Reports{% endblock %}
+{% block page_subtitle %}Generate batch QA summaries, export CSV screening logs, or download PDF inspection reports{% endblock %}
+
+{% block content %}
+<!-- Export Action Panel -->
+<div class="card-panel mb-4">
+  <div class="card-panel-header">
+    <h2 class="card-panel-title"><i class="bi bi-file-earmark-arrow-down text-primary me-2"></i>Generate &amp; Export Screening Report</h2>
+    <span class="badge text-bg-light border">Active Run #{{ latest_run.id }}</span>
+  </div>
+  <div class="card-panel-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="reportBatchSelect" class="form-label small fw-semibold">Filter Report by Batch (Optional)</label>
+        <select id="reportBatchSelect" class="form-select">
+          <option value="">All Batches ({{ latest_run.total_components }} components)</option>
+          {% for b in batches %}
+          <option value="{{ b }}">{{ b }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-8 d-flex flex-wrap gap-2">
+        <a id="exportCsvBtn" href="{{ url_for('export_csv') }}" class="btn btn-primary">
+          <i class="bi bi-filetype-csv me-1"></i>Export Screening CSV
+        </a>
+        <a id="exportPdfBtn" href="{{ url_for('export_pdf') }}" class="btn btn-outline-dark">
+          <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF QA Summary
+        </a>
+        <a href="{{ url_for('components') }}" class="btn btn-outline-secondary">
+          <i class="bi bi-table me-1"></i>Browse Component Table
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Summary Table -->
+<div class="card-panel mb-4">
+  <div class="card-panel-header">
+    <h2 class="card-panel-title"><i class="bi bi-boxes text-primary me-2"></i>Batch-Level Quality &amp; Risk Breakdown</h2>
+    <span class="small text-muted">Sorted by High-Risk count</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-industrial mb-0">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Total</th>
+          <th>Normal</th>
+          <th>Warning</th>
+          <th>Anomalous</th>
+          <th>High-Risk</th>
+          <th>Drift Flags</th>
+          <th>Latent Caught</th>
+          <th>Avg Leakage</th>
+          <th>Avg Score</th>
+          <th>Batch Yield</th>
+          <th>Export</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in batch_summary %}
+        <tr>
+          <td class="mono fw-bold">{{ b.batch_id }}</td>
+          <td class="mono">{{ b.total }}</td>
+          <td class="mono text-success">{{ b.normal }}</td>
+          <td class="mono text-warning">{{ b.warning }}</td>
+          <td class="mono text-danger">{{ b.anomalous }}</td>
+          <td class="mono fw-bold text-danger">{{ b.high_risk }}</td>
+          <td class="mono">{{ b.drift_flagged }}</td>
+          <td class="mono text-primary fw-semibold">{{ b.latent_caught }}</td>
+          <td class="mono">{{ b.avg_leakage_na }} nA</td>
+          <td class="mono">{{ b.avg_anomaly_score }}</td>
+          <td>
+            <span class="status-pill {% if b.yield_pct >= 80 %}pill-normal{% elif b.yield_pct >= 65 %}pill-warning{% else %}pill-anomalous{% endif %}">
+              {{ b.yield_pct }}%
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('export_pdf', batch_id=b.batch_id) }}" class="btn btn-sm btn-outline-secondary" title="Download Batch PDF">
+              <i class="bi bi-file-pdf"></i>
+            </a>
+            <a href="{{ url_for('export_csv', batch_id=b.batch_id) }}" class="btn btn-sm btn-outline-primary" title="Download Batch CSV">
+              <i class="bi bi-download"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SQLite Analysis History -->
+<div class="card-panel">
+  <div class="card-panel-header">
+    <h2 class="card-panel-title"><i class="bi bi-database-check text-primary me-2"></i>SQLite Screening Run Audit Log</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-industrial mb-0">
+      <thead>
+        <tr>
+          <th>Run ID</th>
+          <th>Run Name</th>
+          <th>Dataset Source</th>
+          <th>Timestamp</th>
+          <th>Components</th>
+          <th>Normal / Warn / Anom</th>
+          <th>Safety Slope</th>
+          <th>Drift MAE / R²</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in run_history %}
+        <tr>
+          <td class="mono fw-bold">#{{ r.id }}</td>
+          <td>{{ r.run_name }}</td>
+          <td class="text-truncate" style="max-width: 220px;">{{ r.dataset_source }}</td>
+          <td class="mono small text-muted">{{ r.created_at }}</td>
+          <td class="mono">{{ r.total_components }}</td>
+          <td class="mono">
+            <span class="text-success">{{ r.normal_count }}</span> /
+            <span class="text-warning">{{ r.warning_count }}</span> /
+            <span class="text-danger">{{ r.anomalous_count }}</span>
+          </td>
+          <td class="mono">+/-{{ "%.4f"|format(r.safety_slope) }}</td>
+          <td class="mono">
+            {{ "%.4f"|format(r.drift_mae) if r.drift_mae is not none else "N/A" }} /
+            {{ "%.4f"|format(r.drift_r2) if r.drift_r2 is not none else "N/A" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

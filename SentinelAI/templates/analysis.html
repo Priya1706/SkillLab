@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block title %}Component Analysis ({{ detail.component_id }}) – SentinelAI{% endblock %}
+{% block page_title %}Component Deep-Dive Analysis: <span class="mono text-primary">{{ detail.component_id }}</span>{% endblock %}
+{% block page_subtitle %}Batch {{ detail.batch_id }} | Device: {{ detail.device_type }} | Explainable AI &amp; Drift Trajectory{% endblock %}
+
+{% block content %}
+{% set exp = detail.explanation %}
+
+<!-- Component Selector Bar -->
+<div class="card-panel mb-4">
+  <div class="card-panel-body py-2">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <label class="form-label small fw-semibold mb-1">Inspect Flagged Component</label>
+        <select id="flaggedQuickSelect" class="form-select form-select-sm mono" onchange="if(this.value) window.location='/analysis/' + encodeURIComponent(this.value);">
+          <option value="">-- Select Flagged Component --</option>
+          {% for f in flagged_list %}
+          <option value="{{ f.component_id }}" {% if f.component_id == detail.component_id %}selected{% endif %}>
+            {{ f.component_id }} | {{ f.batch_id }} | Score {{ "%.1f"|format(f.anomaly_score) }} ({{ f.risk_status }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold mb-1">Jump to Any Component ID</label>
+        <div class="input-group input-group-sm">
+          <input id="jumpCompInput" list="componentIdList" type="text" class="form-control mono" placeholder="e.g. CMP-0001" value="{{ detail.component_id }}" />
+          <datalist id="componentIdList">
+            {% for cid in all_ids %}
+            <option value="{{ cid }}"></option>
+            {% endfor %}
+          </datalist>
+          <button class="btn btn-primary" type="button" onclick="const v=document.getElementById('jumpCompInput').value.trim(); if(v) window.location='/analysis/' + encodeURIComponent(v);">
+            Go
+          </button>
+        </div>
+      </div>
+      <div class="col-md-3 text-md-end pt-md-3">
+        <a href="{{ url_for('components') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to Inventory
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Summary Strip -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card {% if detail.anomaly_status == 'ANOMALOUS' %}kpi-red{% elif detail.anomaly_status == 'WARNING' %}kpi-amber{% else %}kpi-emerald{% endif %}">
+      <div class="kpi-label">Anomaly Score (Module A)</div>
+      <div class="kpi-value mono">{{ "%.1f"|format(detail.anomaly_score) }} <span class="fs-6 text-muted">/ 100</span></div>
+      <div class="kpi-sub">
+        <span class="status-pill {% if detail.anomaly_status == 'ANOMALOUS' %}pill-anomalous{% elif detail.anomaly_status == 'WARNING' %}pill-warning{% else %}pill-normal{% endif %}">
+          {{ detail.anomaly_status }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card {% if detail.risk_status == 'HIGH RISK' %}kpi-red{% elif detail.risk_status == 'MEDIUM RISK' %}kpi-amber{% else %}kpi-emerald{% endif %}">
+      <div class="kpi-label">Overall Risk Classification</div>
+      <div class="kpi-value fs-4 mt-1">
+        <span class="status-pill {% if detail.risk_status == 'HIGH RISK' %}pill-high{% elif detail.risk_status == 'MEDIUM RISK' %}pill-medium{% else %}pill-low{% endif %}">
+          {{ detail.risk_status }}
+        </span>
+      </div>
+      <div class="kpi-sub">
+        Static Datasheet:
+        {% if detail.static_pass %}
+        <span class="text-success fw-semibold">PASS</span>
+        {% else %}
+        <span class="text-danger fw-semibold">FAIL</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card">
+      <div class="kpi-label">Predicted 168h Value</div>
+      <div class="kpi-value mono">{{ "%.2f"|format(detail.predicted_value_168h) }}</div>
+      <div class="kpi-sub">
+        Net Drift: <span class="mono fw-semibold">{{ "%+.2f"|format(detail.predicted_drift) }}</span>
+        {% if detail.value_168h is not none %}
+        | Actual: <span class="mono">{{ "%.2f"|format(detail.value_168h) }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card {% if detail.drift_flag %}kpi-red{% else %}kpi-emerald{% endif %}">
+      <div class="kpi-label">Drift Rate vs Safety Slope</div>
+      <div class="kpi-value mono {% if detail.drift_flag %}text-danger{% else %}text-success{% endif %}">
+        {{ "%+.4f"|format(detail.drift_rate) }}
+      </div>
+      <div class="kpi-sub">
+        Limit: <span class="mono">+/-{{ "%.4f"|format(latest_run.safety_slope) }}/hr</span>
+        ({{ "EXCEEDS" if detail.drift_flag else "WITHIN" }})
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Explainable AI Narrative -->
+<div class="card-panel mb-4">
+  <div class="card-panel-header">
+    <h2 class="card-panel-title"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Explainable AI Quality Inspector Assessment</h2>
+    {% if detail.static_pass and detail.risk_status != 'LOW RISK' %}
+    <span class="status-pill pill-blue">Latent Anomaly Beyond Static Limits</span>
+    {% endif %}
+  </div>
+  <div class="card-panel-body">
+    <p class="mb-3 fs-6 lh-base">{{ exp.summary }}</p>
+    <div class="alert alert-light border small text-muted mb-0 py-2">
+      <i class="bi bi-info-circle me-1"></i>{{ exp.disclaimer }}
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Historical Measurements &amp; Predicted 168h Drift Envelope</h2>
+      </div>
+      <div class="card-panel-body">
+        <div id="compDriftChart" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-panel h-100">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title">Parameter Contribution to Anomaly Score</h2>
+        <span class="badge text-bg-light border">Ablation Attribution</span>
+      </div>
+      <div class="card-panel-body">
+        <div id="compContribChart" class="plotly-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Telemetry vs Batch Peers Table -->
+<div class="card-panel">
+  <div class="card-panel-header">
+    <h2 class="card-panel-title">Electrical Telemetry &amp; Batch Peer Comparison ({{ detail.batch_id }})</h2>
+    {% if detail.synthetic_defect_type and detail.synthetic_defect_type != 'Unknown' %}
+    <span class="badge text-bg-secondary">Synthetic Ground-Truth Tag: {{ detail.synthetic_defect_type }}</span>
+    {% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-industrial mb-0">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Measured Value</th>
+          <th>Batch Mean</th>
+          <th>Global Mean</th>
+          <th>Batch Z-Score</th>
+          <th>Static Limit</th>
+          <th>Model Contribution</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in exp.parameter_comparisons %}
+        <tr>
+          <td class="fw-semibold">{{ p.display_name }}</td>
+          <td class="mono fw-bold">{{ p.value }} {{ p.unit }}</td>
+          <td class="mono text-muted">{{ p.batch_mean }} {{ p.unit }}</td>
+          <td class="mono text-muted">{{ p.global_mean }} {{ p.unit }}</td>
+          <td class="mono {% if p.batch_z_score|abs >= 2.0 %}text-danger fw-bold{% elif p.batch_z_score|abs >= 1.2 %}text-warning fw-semibold{% endif %}">
+            {{ "%+.2f"|format(p.batch_z_score) }}σ
+          </td>
+          <td class="mono">
+            {% if p.static_limit is not none %}
+              &le; {{ p.static_limit }} {{ p.unit }}
+              {% if p.within_static_limit %}
+              <span class="badge text-bg-light border text-success ms-1">OK</span>
+              {% else %}
+              <span class="badge text-bg-light border text-danger ms-1">EXCEEDED</span>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">Trend Metric</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height: 7px;">
+                <div class="progress-bar bg-primary" style="width: {{ p.contribution_pct }}%;"></div>
+              </div>
+              <span class="mono small fw-semibold">{{ "%.1f"|format(p.contribution_pct) }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const v0 = {{ detail.value_0h | tojson }};
+  const v24 = {{ detail.value_24h | tojson }};
+  const v96 = {{ detail.value_96h | tojson }};
+  const v168Actual = {{ detail.value_168h | tojson }};
+  const v168Pred = {{ detail.predicted_value_168h | tojson }};
+  const slope = {{ latest_run.safety_slope | tojson }};
+
+  const hours = [0, 24, 96, 168];
+  const upperBand = hours.map(h => v0 + slope * h);
+  const lowerBand = hours.map(h => v0 - slope * h);
+
+  const traces = [
+    {
+      type: "scatter",
+      x: hours,
+      y: upperBand,
+      mode: "lines",
+      line: { color: "rgba(37, 99, 235, 0.35)", dash: "dash", width: 1.5 },
+      name: "Upper Safety Envelope"
+    },
+    {
+      type: "scatter",
+      x: hours,
+      y: lowerBand,
+      mode: "lines",
+      fill: "tonexty",
+      fillcolor: "rgba(37, 99, 235, 0.08)",
+      line: { color: "rgba(37, 99, 235, 0.35)", dash: "dash", width: 1.5 },
+      name: "Lower Safety Envelope"
+    },
+    {
+      type: "scatter",
+      x: [0, 24],
+      y: [v0, v24],
+      mode: "lines+markers",
+      line: { color: "#0F172A", width: 3 },
+      marker: { size: 9 },
+      name: "Input Measurements (0h, 24h)"
+    },
+    {
+      type: "scatter",
+      x: [24, 168],
+      y: [v24, v168Pred],
+      mode: "lines+markers",
+      line: { color: "#DC2626", width: 2.5, dash: "dot" },
+      marker: { size: 10, symbol: "diamond" },
+      name: "RF Predicted 168h"
+    }
+  ];
+
+  const actualX = [0, 24];
+  const actualY = [v0, v24];
+  if (v96 !== null) { actualX.push(96); actualY.push(v96); }
+  if (v168Actual !== null) { actualX.push(168); actualY.push(v168Actual); }
+  if (actualX.length > 2) {
+    traces.push({
+      type: "scatter",
+      x: actualX,
+      y: actualY,
+      mode: "lines+markers",
+      line: { color: "#059669", width: 2.5 },
+      marker: { size: 8 },
+      name: "Actual Ground Truth"
+    });
+  }
+
+  Plotly.newPlot("compDriftChart", traces, {
+    font: { family: "Inter, Segoe UI, sans-serif", color: "#334155", size: 12 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "#ffffff",
+    margin: { t: 24, r: 20, b: 46, l: 54 },
+    xaxis: { title: "Burn-In Time (Hours)", tickvals: [0, 24, 96, 168], gridcolor: "#f1f5f9" },
+    yaxis: { title: "Parametric Value", gridcolor: "#f1f5f9" },
+    legend: { orientation: "h", y: 1.15, x: 0 }
+  }, { responsive: true, displaylogo: false });
+
+  // Feature contribution horizontal bar chart
+  const params = {{ detail.explanation.parameter_comparisons | tojson }};
+  const sorted = [...params].sort((a, b) => a.contribution_pct - b.contribution_pct);
+  Plotly.newPlot("compContribChart", [{
+    type: "bar",
+    orientation: "h",
+    x: sorted.map(p => p.contribution_pct),
+    y: sorted.map(p => p.display_name),
+    marker: {
+      color: sorted.map(p => p.contribution_pct >= 20 ? "#DC2626" : p.contribution_pct >= 12 ? "#D97706" : "#2563EB")
+    },
+    hovertemplate: "<b>%{y}</b><br>Contribution: %{x:.1f}%<extra></extra>"
+  }], {
+    font: { family: "Inter, Segoe UI, sans-serif", color: "#334155", size: 11 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "#ffffff",
+    margin: { t: 20, r: 20, b: 42, l: 175 },
+    xaxis: { title: "Relative Contribution (%)", range: [0, 100], gridcolor: "#f1f5f9" },
+    yaxis: { automargin: true }
+  }, { responsive: true, displaylogo: false });
+});
+</script>
+{% endblock %}
